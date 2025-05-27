@@ -5,8 +5,8 @@ public interface Deque<T> {
     T removeFirst();
     void addLast(T t);
     T removeLast();
-    default boolean isEmpty(){
-        return size()==0;
+    default boolean isEmpty() {
+        return size() == 0;
     }
     int size();
     T get(int idx);
