@@ -47,15 +47,15 @@ public class ArrayDeque<T> implements Deque<T> {
         else{
             System.arraycopy(array,pre,tmp,1,array.length-pre);
             System.arraycopy(array,0,tmp,1+array.length-pre,last+1);
-            last=array.length+last-pre+2;
         }
         pre=0;
+        last=size+1;
         array=tmp;
     }
 
     private void extend(){
         if(size== array.length) {
-            resize((int) (array.length * 1.2));
+            resize((int) (array.length * 1.2)+1);
         }
     }
 
@@ -116,14 +116,9 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.print(array[end]);
     }
 
-
     @Override
     public int size(){
         return size;
-    }
-
-    public int capacity(){
-        return array.length;
     }
 
     public Iterator<T> iterator(){

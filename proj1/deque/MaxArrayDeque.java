@@ -13,7 +13,19 @@ public class MaxArrayDeque<T> extends ArrayDeque<T>{
         T res=super.get(0);
         for(int i=1;i<super.size();i++){
             T tmp=super.get(i);
-            if(compar.compare(super.get(i),res)<0){
+            if(compar.compare(tmp,res)<0){
+                res=tmp;
+            }
+        }
+        return res;
+    }
+
+    public T max(Comparator<T> c){
+        if(super.isEmpty())return null;
+        T res=super.get(0);
+        for(int i=1;i<super.size();i++){
+            T tmp=super.get(i);
+            if(c.compare(tmp,res)<0){
                 res=tmp;
             }
         }

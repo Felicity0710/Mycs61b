@@ -1,7 +1,5 @@
 package deque;
 
-import java.util.Iterator;
-
 public interface Deque<T> {
     void addFirst(T t);
     T removeFirst();
@@ -13,5 +11,4 @@ public interface Deque<T> {
     int size();
     T get(int idx);
     void printDeque();
-    Iterator<T> iterator();
 }
