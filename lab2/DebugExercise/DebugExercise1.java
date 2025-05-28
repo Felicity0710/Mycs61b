@@ -6,7 +6,7 @@ package DebugExercise;
  */
 public class DebugExercise1 {
     public static int divideThenRound(int top, int bottom) {
-        return Math.round(((float)top)/((float)bottom));
+        return Math.round(((float) top) / ((float) bottom));
     }
 
     public static void main(String[] args) {
