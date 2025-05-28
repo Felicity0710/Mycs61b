@@ -18,5 +18,4 @@ public interface Deque<T> {
     T get(int idx);
 
     void printDeque();
-
 }
