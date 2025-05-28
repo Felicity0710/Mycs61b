@@ -138,34 +138,23 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public boolean equals(Object t) {
-        if (t instanceof ArrayDeque) {
-            ArrayDeque<?> tmp = (ArrayDeque<?>) t;
-            if (size() != tmp.size()) {
-                return false;
-            }
-            Iterator<T> it1 = iterator();
-            Iterator<?> it2 = tmp.iterator();
-            while (it1.hasNext() && it2.hasNext()) {
-                if (!it1.next().equals(it2.next())) {
-                    return false;
-                }
-            }
-            return !it1.hasNext() && !it2.hasNext();
-        } else if (t instanceof LinkedListDeque) {
-            LinkedListDeque<?> tmp = (LinkedListDeque<?>) t;
-            if (size() != tmp.size()) {
-                return false;
-            }
-            Iterator<T> it1 = iterator();
-            Iterator<?> it2 = tmp.iterator();
-            while (it1.hasNext() && it2.hasNext()) {
-                if (!it1.next().equals(it2.next())) {
-                    return false;
-                }
-            }
-            return !it1.hasNext() && !it2.hasNext();
-        } else {
+        if (this == t) {
+            return true;
+        } else if (!(t instanceof Deque)) {
             return false;
+        } else {
+            Deque<?> tmp = (Deque<?>) t;
+            if (size() != tmp.size()) {
+                return false;
+            }
+            Iterator<T> it = iterator();
+            Iterator<?> it2 = tmp.iterator();
+            while (it.hasNext() && it2.hasNext()) {
+                if (!it.next().equals(it2.next())) {
+                    return false;
+                }
+            }
+            return !it.hasNext() && !it2.hasNext();
         }
     }
 
