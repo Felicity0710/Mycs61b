@@ -11,7 +11,9 @@ public interface Deque<T> {
 
     T removeLast();
 
-    boolean isEmpty();
+    default boolean isEmpty() {
+        return size() == 0;
+    }
 
     int size();
 
@@ -20,4 +22,5 @@ public interface Deque<T> {
     void printDeque();
 
     Iterator<T> iterator();
+    
 }
