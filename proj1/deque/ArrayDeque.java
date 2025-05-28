@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Iterable<T> {
 
     private class ArrayDequeIterator implements Iterator<T> {
         private int now;
@@ -67,7 +67,6 @@ public class ArrayDeque<T> implements Deque<T> {
         }
     }
 
-    @Override
     public void addFirst(T t) {
         extend();
         array[pre--] = t;
@@ -75,7 +74,6 @@ public class ArrayDeque<T> implements Deque<T> {
         size++;
     }
 
-    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -87,7 +85,6 @@ public class ArrayDeque<T> implements Deque<T> {
         return res;
     }
 
-    @Override
     public void addLast(T t) {
         extend();
         array[last++] = t;
@@ -95,7 +92,6 @@ public class ArrayDeque<T> implements Deque<T> {
         size++;
     }
 
-    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -107,12 +103,10 @@ public class ArrayDeque<T> implements Deque<T> {
         return res;
     }
 
-    @Override
     public T get(int idx) {
         return array[(pre + 1 + idx) % array.length];
     }
 
-    @Override
     public void printDeque() {
         int start = (pre + 1) % array.length;
         int end = (last - 1 + array.length) % array.length;
@@ -122,7 +116,10 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.print(array[end]);
     }
 
-    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
     public int size() {
         return size;
     }
@@ -148,7 +145,7 @@ public class ArrayDeque<T> implements Deque<T> {
                 return false;
             }
             for (int i = 0; i < size(); i++) {
-                if (get(i) != tmp.get(i)) {
+                if (!get(i).equals(tmp.get(i))) {
                     return false;
                 }
             }
@@ -167,7 +164,7 @@ public class ArrayDeque<T> implements Deque<T> {
             }
             Iterator<T> it1 = iterator(), it2 = tmp.iterator();
             while (it1.hasNext()) {
-                if (it1.next() != it2.next()) {
+                if (!it1.next().equals(it2.next())) {
                     return false;
                 }
             }
