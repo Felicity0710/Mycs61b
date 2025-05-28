@@ -14,6 +14,7 @@ public class LinkedListDeque<T> implements Deque<T> {
             this.pre = pref;
             this.next = nxt;
         }
+
         public Node(Node pref, Node nxt) {
             this.pre = pref;
             this.next = nxt;
@@ -34,7 +35,7 @@ public class LinkedListDeque<T> implements Deque<T> {
 
         @Override
         public T next() {
-            if(!hasNext()) {
+            if (!hasNext()) {
                 return null;
             }
             now = now.next;
@@ -47,8 +48,8 @@ public class LinkedListDeque<T> implements Deque<T> {
     private int size;
 
     public LinkedListDeque() {
-        preSentinel = new Node(null,null);
-        lastSentinel = new Node(null,null);
+        preSentinel = new Node(null, null);
+        lastSentinel = new Node(null, null);
         preSentinel.next = lastSentinel;
         lastSentinel.pre = preSentinel;
         size = 0;
@@ -64,7 +65,7 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T removeFirst() {
-        if(isEmpty()){
+        if (isEmpty()) {
             return null;
         }
         Node tmp = preSentinel.next;
@@ -84,7 +85,7 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T removeLast() {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return null;
         }
         Node tmp = lastSentinel.pre;
@@ -96,7 +97,7 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T get(int idx) {
-        if(idx >= size || idx < 0){
+        if (idx >= size || idx < 0) {
             return null;
         }
         Node now = preSentinel;
@@ -108,17 +109,17 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     private T getRecursiveHelper(Node now, int idx) {
-        if(now.next == null) {
+        if (now.next == null) {
             return null;
         }
-        if(idx == 0) {
+        if (idx == 0) {
             return now.item;
         }
-        return getRecursiveHelper(now.next, idx-1);
+        return getRecursiveHelper(now.next, idx - 1);
     }
 
     public T getRecursive(int idx) {
-        if(idx < 0){
+        if (idx < 0) {
             return null;
         }
         return getRecursiveHelper(preSentinel.next, idx);
@@ -138,7 +139,55 @@ public class LinkedListDeque<T> implements Deque<T> {
         return size;
     }
 
+    @Override
     public Iterator<T> iterator() {
         return new LinkedListDequeIterator();
+    }
+
+    @Override
+    public boolean equals(Object t) {
+        if (t == null) {
+            return false;
+        } else if (t instanceof ArrayDeque) {
+            ArrayDeque<T> tmp = (ArrayDeque<T>) t;
+            if (tmp.size() != size()) {
+                return false;
+            }
+            if (isEmpty()) {
+                return true;
+            }
+            T element1 = get(0), element2 = tmp.get(0);
+            if (!(element1 != null && element2 != null)) {
+                return false;
+            }
+            Iterator<T> it = iterator();
+            for (int i = 0; i < size(); i++) {
+                if (it.next() != tmp.get(i)) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (t instanceof LinkedListDeque) {
+            LinkedListDeque<T> tmp = (LinkedListDeque<T>) t;
+            if (tmp.size() != size()) {
+                return false;
+            }
+            if (isEmpty()) {
+                return true;
+            }
+            T element1 = get(0), element2 = tmp.get(0);
+            if (!(element1 != null && element2 != null)) {
+                return false;
+            }
+            Iterator<T> it1 = iterator(), it2 = tmp.iterator();
+            while (it1.hasNext()) {
+                if (it1.next() != it2.next()) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -14,7 +14,7 @@ public class GuitarString {
     public GuitarString(double frequency) {
         buffer = new LinkedListDeque<>();
         long n = Math.round((SR / frequency));
-        for(long i = 0; i < n; i++) {
+        for (long i = 0; i < n; i++) {
             buffer.addFirst((double) 0);
         }
     }
@@ -23,10 +23,10 @@ public class GuitarString {
     /* Pluck the guitar string by replacing the buffer with white noise. */
     public void pluck() {
         int n = buffer.size();
-        for(int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             buffer.removeFirst();
         }
-        for(int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             buffer.addFirst(Math.random() - 0.5);
         }
     }
