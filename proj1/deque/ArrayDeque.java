@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private class ArrayDequeIterator implements Iterator<T> {
         private int now;
@@ -127,53 +127,28 @@ public class ArrayDeque<T> implements Deque<T> {
         return size;
     }
 
+    @Override
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
 
     @Override
     public boolean equals(Object t) {
-        if (t == null) {
+        if (this == t) {
+            return true;
+        } else if (!(t instanceof Deque)) {
             return false;
-        } else if (t instanceof ArrayDeque) {
-            ArrayDeque<T> tmp = (ArrayDeque<T>) t;
-            if (tmp.size() != size()) {
-                return false;
-            }
-            if (isEmpty()) {
-                return true;
-            }
-            T element1 = get(0), element2 = tmp.get(0);
-            if (!(element1 != null && element2 != null)) {
+        } else {
+            Deque<?> tmp = (Deque<?>) t;
+            if (size() != tmp.size()) {
                 return false;
             }
             for (int i = 0; i < size(); i++) {
-                if (get(i) != tmp.get(i)) {
+                if (!get(i).equals(tmp.get(i))) {
                     return false;
                 }
             }
             return true;
-        } else if (t instanceof LinkedListDeque) {
-            LinkedListDeque<T> tmp = (LinkedListDeque<T>) t;
-            if (tmp.size() != size()) {
-                return false;
-            }
-            if (isEmpty()) {
-                return true;
-            }
-            T element1 = get(0), element2 = tmp.get(0);
-            if (!(element1 != null && element2 != null)) {
-                return false;
-            }
-            Iterator<T> it1 = iterator(), it2 = tmp.iterator();
-            while (it1.hasNext()) {
-                if (it1.next() != it2.next()) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
         }
     }
 
