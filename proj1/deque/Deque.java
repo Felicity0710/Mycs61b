@@ -20,4 +20,5 @@ public interface Deque<T> extends Iterable<T> {
     T get(int idx);
 
     void printDeque();
+
 }
