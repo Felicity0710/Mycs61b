@@ -128,10 +128,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     public int size() {
         return size;
     }
@@ -147,33 +143,27 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             if (size() != tmp.size()) {
                 return false;
             }
-            if (isEmpty()) {
-                return true;
-            }
             Iterator<T> it1 = iterator();
             Iterator<?> it2 = tmp.iterator();
-            while (it1.hasNext()) {
+            while (it1.hasNext() && it2.hasNext()) {
                 if (!it1.next().equals(it2.next())) {
                     return false;
                 }
             }
-            return true;
-        } else if (t instanceof LinkedListDeque<?>) {
+            return !it1.hasNext() && !it2.hasNext();
+        } else if (t instanceof LinkedListDeque) {
             LinkedListDeque<?> tmp = (LinkedListDeque<?>) t;
             if (size() != tmp.size()) {
                 return false;
             }
-            if (isEmpty()) {
-                return true;
-            }
             Iterator<T> it1 = iterator();
             Iterator<?> it2 = tmp.iterator();
-            while (it1.hasNext()) {
+            while (it1.hasNext() && it2.hasNext()) {
                 if (!it1.next().equals(it2.next())) {
                     return false;
                 }
             }
-            return true;
+            return !it1.hasNext() && !it2.hasNext();
         } else {
             return false;
         }
