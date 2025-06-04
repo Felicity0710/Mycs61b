@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class BSTMap<K extends Comparable<K>, V extends Comparable<V>> implements Map61B<K, V> {
+public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     private static final boolean RED = true;
     private static final boolean BLACK = false;
@@ -242,9 +242,9 @@ public class BSTMap<K extends Comparable<K>, V extends Comparable<V>> implements
         }
     }
 
-    public V remove(K k, V v) {
+    public V remove(K k, V v) {//由于v不可以继承自Comparable，这里无法完成
         node result = get(root, k);
-        if (result == null || result.val.compareTo(v) != 0) {
+        if (result == null) {
             return null;
         } else {
             root = delete(root, k);
@@ -283,5 +283,18 @@ public class BSTMap<K extends Comparable<K>, V extends Comparable<V>> implements
         Set<K> s = new TreeSet<>();
         keySet(s, root);
         return s;
+    }
+
+    private void printInOrder(node u) {
+        if (u == null) {
+            return;
+        }
+        printInOrder(u.left);
+        System.out.println(u.k);
+        printInOrder(u.right);
+    }
+
+    public void printInOrder() {
+        printInOrder(root);
     }
 }
