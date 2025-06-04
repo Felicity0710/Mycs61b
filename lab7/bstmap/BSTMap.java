@@ -4,20 +4,20 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>> implements Map61B<Key, Value> {
+public class BSTMap<K extends Comparable<K>, V extends Comparable<V>> implements Map61B<K, V> {
 
     private static final boolean RED = true;
     private static final boolean BLACK = false;
 
     private class node {
-        private Key key;
-        private Value val;
+        private K k;
+        private V val;
         private node left, right;
         private boolean color;
         private int size;
 
-        private node(Key k, Value v, boolean c, int s) {
-            key = k;
+        private node(K k, V v, boolean c, int s) {
+            this.k = k;
             val = v;
             color = c;
             size = s;
@@ -25,7 +25,7 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         }
     }
 
-    private class BSTMapIterator implements Iterator<Key> {
+    private class BSTMapIterator implements Iterator<K> {
         int idx;
 
         BSTMapIterator() {
@@ -36,13 +36,13 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
             return idx < size();
         }
 
-        public Key next() {
+        public K next() {
             node result = getRank(root, idx);
             idx++;
             if (result == null) {
                 return null;
             } else {
-                return result.key;
+                return result.k;
             }
         }
     }
@@ -65,11 +65,11 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         return size(root);
     }
 
-    private node get(node u, Key k) {
+    private node get(node u, K k) {
         if (u == null) {
             return null;
         }
-        int cmp = k.compareTo(u.key);
+        int cmp = k.compareTo(u.k);
         if (cmp < 0) {
             return get(u.left, k);
         } else if (cmp > 0) {
@@ -79,7 +79,7 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         }
     }
 
-    public Value get(Key k) {
+    public V get(K k) {
         node result = get(root, k);
         if (result == null) {
             return null;
@@ -88,7 +88,7 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         }
     }
 
-    public boolean containsKey(Key k) {
+    public boolean containsKey(K k) {
         node result = get(root, k);
         return result != null;
     }
@@ -146,11 +146,11 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         return u;
     }
 
-    private node insert(node u, Key k, Value v) {
+    private node insert(node u, K k, V v) {
         if (u == null) {
             return new node(k, v, RED, 1);
         }
-        int cmp = k.compareTo(u.key);
+        int cmp = k.compareTo(u.k);
         if (cmp < 0) {
             u.left = insert(u.left, k, v);
         } else if (cmp > 0) {
@@ -161,7 +161,7 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         return balance(u);
     }
 
-    public void put(Key k, Value v) {
+    public void put(K k, V v) {
         root = insert(root, k, v);
     }
 
@@ -203,8 +203,8 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         return balance(u);
     }
 
-    private node delete(node u, Key k) {
-        if (k.compareTo(u.key) < 0) {
+    private node delete(node u, K k) {
+        if (k.compareTo(u.k) < 0) {
             if (!isRed(u.left) && !isRed(u.left.left)) {
                 u = moveRedLeft(u);
             }
@@ -213,15 +213,15 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
             if (isRed(u.left)) {
                 u = rotateRight(u);
             }
-            if (k.compareTo(u.key) == 0 && u.right == null) {
+            if (k.compareTo(u.k) == 0 && u.right == null) {
                 return null;
             }
             if (!isRed(u.right) && !isRed(u.right.left)) {
                 u = moveRedRight(u);
             }
-            if (k.compareTo(u.key) == 0) {
+            if (k.compareTo(u.k) == 0) {
                 node tmp = min(u.right);
-                u.key = tmp.key;
+                u.k = tmp.k;
                 u.val = tmp.val;
                 u.right = deleteMin(u.right);
             } else {
@@ -231,18 +231,18 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         return balance(u);
     }
 
-    public Value remove(Key k) {
+    public V remove(K k) {
         node result = get(root, k);
         if (result == null) {
             return null;
         } else {
-            Value ret = result.val;
+            V ret = result.val;
             root = delete(root, k);
             return ret;
         }
     }
 
-    public Value remove(Key k, Value v) {
+    public V remove(K k, V v) {
         node result = get(root, k);
         if (result == null || result.val.compareTo(v) != 0) {
             return null;
@@ -266,21 +266,21 @@ public class BSTMap<Key extends Comparable<Key>, Value extends Comparable<Value>
         }
     }
 
-    public Iterator<Key> iterator() {
+    public Iterator<K> iterator() {
         return new BSTMapIterator();
     }
 
-    private void keySet(Set<Key> s, node u) {
+    private void keySet(Set<K> s, node u) {
         if (u == null) {
             return;
         }
-        s.add(u.key);
+        s.add(u.k);
         keySet(s, u.left);
         keySet(s, u.right);
     }
 
-    public Set<Key> keySet() {
-        Set<Key> s = new TreeSet<>();
+    public Set<K> keySet() {
+        Set<K> s = new TreeSet<>();
         keySet(s, root);
         return s;
     }
