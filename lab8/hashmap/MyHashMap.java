@@ -25,14 +25,9 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             value = v;
         }
 
-        @Override
-        public boolean equals(Object obj) {
-            Node u = (Node) obj;
-            return u.key.equals(key) && u.value.equals(value);
-        }
     }
 
-    protected class HashMapIterator implements Iterator<K> {
+    private class HashMapIterator implements Iterator<K> {
         private Iterator<K> it;
 
         HashMapIterator() {
@@ -126,10 +121,17 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
         int hashCode = getHashCode(key, buckets.length);
         Collection<Node> ll = buckets[hashCode];
-        ll.remove(createNode(key, result));
+        Collection<Node> tmp = createBucket();
+        for (Node now : ll) {
+            if (!(now.key.equals(key) && now.value.equals(result))) {
+                tmp.add(now);
+            }
+        }
         size--;
-        if (ll.isEmpty()) {
+        if (tmp.isEmpty()) {
             buckets[hashCode] = null;
+        } else {
+            buckets[hashCode] = tmp;
         }
         return result;
     }
