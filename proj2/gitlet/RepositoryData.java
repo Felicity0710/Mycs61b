@@ -8,20 +8,50 @@ import static gitlet.Repository.GITLET_DIR;
 import static gitlet.Utils.*;
 
 public class RepositoryData implements Serializable {
+    private boolean isConflict;
     private int offsetHours;
     private int offsetMinutes;
     private String HEAD;
     private String CURRENT_BRANCH;
+    private String p1;
+    private String p2;
     private HashMap<String, String> branches;
     public static final File DATA_DIR = join(GITLET_DIR, ".data");
     public static final File DATA_FILE = join(DATA_DIR, "data");
 
     public RepositoryData() {
+        isConflict = false;
         offsetHours = 0;
         offsetMinutes = 0;
         HEAD = "";
         CURRENT_BRANCH = "";
+        p1 = "";
+        p2 = "";
         branches = new HashMap<>();
+    }
+
+    public String getP1() {
+        return p1;
+    }
+
+    public String getP2() {
+        return p2;
+    }
+
+    public void setP1(String x) {
+        p1 = x;
+    }
+
+    public void setP2(String x) {
+        p2 = x;
+    }
+
+    public boolean getIsConflict() {
+        return isConflict;
+    }
+
+    public void setIsConflict(boolean x) {
+        isConflict = x;
     }
 
     public int getOffsetHours() {

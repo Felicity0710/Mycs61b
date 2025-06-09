@@ -12,7 +12,6 @@ import static gitlet.Utils.*;
 import static gitlet.removal.REMOV_DIR;
 import static gitlet.removal.REMOV_FILE;
 import static gitlet.stagedFile.STAGED;
-import static gitlet.stagedFile.STAGED_FILE_DIR;
 
 /**
  * Represents a gitlet repository.
@@ -33,6 +32,8 @@ public class Repository {
      */
     private static final String initError = "A Gitlet version-control already exists in the current directory.";
     private static final String addError = "File does not exist.";
+    private static final String commitNoChangeError = "No changes to the commit.";
+    private static final String commitNoMessageError = "Please enter a commit message";
     private static final String removeError = "No reason to remove the file.";
     private static final String findError = "Found no commit with that message.";
     private static final String checkoutFileNotFoundError = "File does not exist in that commit.";
@@ -49,7 +50,7 @@ public class Repository {
     private static final String mergeWithStagedOrRemovalError = "You have uncommitted changes.";
     private static final String mergeBranchNotExistError = "A branch with that name does not exist.";
     private static final String mergeItselfError = "Cannot merge a branch with itself.";
-
+    private static final String mergeConflict = "Encountered a merge conflict.";
     /**
      * The current working directory.
      */
@@ -61,10 +62,14 @@ public class Repository {
     /**
      * HEAD commit's hashID
      */
+    private static boolean isChanged;
+    private static boolean isConflict;
     private static int offsetHours;
     private static int offsetMinutes;
     private static String HEAD = "";
     private static String CURRENT_BRANCH = "";
+    private static String p1 = "";
+    private static String p2 = "";
     private static HashMap<String, String> branches;
 
     private static String getTime(Date d) {
@@ -119,27 +124,16 @@ public class Repository {
     }
 
     public static String makeCommit(String ts, String mes) {
-        getData();
-        Commit newCommit = new Commit(ts, mes, HEAD, "");
+        Commit newCommit = new Commit(ts, mes, HEAD, "", 0);
         if (!HEAD.isEmpty()) {
-            newCommit.CopyParentCommit();
-
             stagedFile staged = stagedFile.fromFile();
-            Iterator<String> it = staged.iterator();
-            while (it.hasNext()) {
-                String file = it.next();
-                File desFile = join(STAGED_FILE_DIR, file);
-                byte[] src = readContents(desFile);
-                desFile.delete();
-                String hashCode = sha1(src);
-                File newFile = join(BLOB_DIR, hashCode);
-                writeContents(newFile, src);
-                newCommit.put(file, hashCode);
-            }
-            staged.clear();
-            staged.saveFile();
-
             removal removed = removal.fromFile();
+            if (staged.isEmpty() && removed.isEmpty()) {
+                System.out.println(commitNoChangeError);
+                exit();
+            }
+            newCommit.CopyParentCommit();
+            staged.toCommit(newCommit);
             Iterator<String> it2 = removed.iterator();
             while (it2.hasNext()) {
                 String file = it2.next();
@@ -185,20 +179,26 @@ public class Repository {
 
     private static void getData() {
         RepositoryData repoData = RepositoryData.fromFile();
+        isConflict = repoData.getIsConflict();
         offsetHours = repoData.getOffsetHours();
         offsetMinutes = repoData.getOffsetMinutes();
         HEAD = repoData.getHEAD();
         CURRENT_BRANCH = repoData.getCURRENT_BRANCH();
         branches = repoData.getBranches();
+        p1 = repoData.getP1();
+        p2 = repoData.getP2();
     }
 
     private static void setData() {
         RepositoryData repoData = RepositoryData.fromFile();
+        repoData.setIsConflict(isConflict);
         repoData.setOffsetHours(offsetHours);
         repoData.setOffsetMinutes(offsetMinutes);
         repoData.setHEAD(HEAD);
         repoData.setCURRENT_BRANCH(CURRENT_BRANCH);
         repoData.setBranches(branches);
+        repoData.setP1(p1);
+        repoData.setP2(p2);
         repoData.saveFile();
     }
 
@@ -243,10 +243,30 @@ public class Repository {
         }
     }
 
-    public static void commit(String message) {
+    public static void commit(String[] message) {
+        if (message.length == 1) {
+            System.out.println(commitNoMessageError);
+            exit();
+        }
         getData();
-        HEAD = makeCommit(getTime(new Date()), message);
-        makeBranch(CURRENT_BRANCH, HEAD);
+        if (!isConflict) {
+            HEAD = makeCommit(getTime(new Date()), message[1]);
+            makeBranch(CURRENT_BRANCH, HEAD);
+        } else {
+            isConflict = false;
+            Commit newCommit = new Commit(getTime(new Date()),
+                    "Merged " + p1 + " into " + p2 + ".",
+                    branches.get(p1),
+                    branches.get(p2),
+                    Commit.fromFile(HEAD).depth() + 1
+            );
+            stagedFile staged = stagedFile.fromFile();
+            staged.toCommit(newCommit);
+            staged.saveFile();
+            HEAD = newCommit.saveFile();
+            makeBranch(CURRENT_BRANCH, HEAD);
+            branches.remove(p2);
+        }
         setData();
     }
 
@@ -479,12 +499,159 @@ public class Repository {
         setData();
     }
 
-    //对于同一个文件，在两个分支内，若一个未修改过，一个修改过，保留修改的那一份，并自动staged
-    //都修改了，但内容相同的，保留不变
-    //两个分支都删除的，但目录里还有同名文件，那么被留下来，且不staged也不tracked
-    //在共同祖先没有，但current branch有的，保留
-    //共同祖先有，current branch没有修改，given branch里没有的，删去，且不tracked
-    //共同祖先有，current branch没有，given branch未修改，保留absent
-    //都有不同修改，或者一个修改一个删除的， 或者共同祖先没有，两个分支有但不同的， 使用conflict格式替代内容
+    public static void merge(String givenBranch) {
+        getData();
+        stagedFile staged = stagedFile.fromFile();
+        removal removed = removal.fromFile();
+        if (!staged.isEmpty() || !removed.isEmpty()) {
+            System.out.println(mergeWithStagedOrRemovalError);
+            exit();
+        }
+        if (!branches.containsKey(givenBranch)) {
+            System.out.println(mergeBranchNotExistError);
+            exit();
+        }
+        if (CURRENT_BRANCH.equals(givenBranch)) {
+            System.out.println(mergeItselfError);
+            exit();
+        }
+        String currentBranchID = branches.get(CURRENT_BRANCH), givenBranchID = branches.get(givenBranch);
+        String LCA = Commit.findLCA(currentBranchID, givenBranchID);
+        if (LCA.equals(givenBranchID)) {
+            System.out.println(mergeGivenBranchIsAncestorError);
+            exit();
+        }
+        if (LCA.equals(currentBranchID)) {
+            String currentBranch = CURRENT_BRANCH;
+            checkoutBranchFile(givenBranch);
+            CURRENT_BRANCH = currentBranch;
+            branches.put(CURRENT_BRANCH, HEAD);
+            System.out.println(mergeCurrentBranchIsAncestorError);
+            setData();
+            exit();
+        }
+        isConflict = false;
+        isChanged = false;
+        Commit currentBranchCommit = Commit.fromFile(currentBranchID);
+        Commit givenBranchCommit = Commit.fromFile(givenBranchID);
+        Commit LCACommit = Commit.fromFile(LCA);
+        checkUntrack(currentBranchCommit, givenBranchCommit, LCACommit);
+        mergeCommit(currentBranchCommit, givenBranchCommit, LCACommit, staged, true);
+        mergeCommit(givenBranchCommit, currentBranchCommit, LCACommit, staged, false);
+        if (!isChanged) {
+            System.out.println(commitNoChangeError);
+            exit();
+        }
+        if (!isConflict) {
+            Commit newCommit = new Commit(getTime(new Date()),
+                    "Merged " + givenBranch + " into " + CURRENT_BRANCH + ".",
+                    currentBranchID,
+                    givenBranchID,
+                    currentBranchCommit.depth()
+            );
+            staged.toCommit(newCommit);
+            HEAD = newCommit.saveFile();
+            branches.put(CURRENT_BRANCH, HEAD);
+            branches.remove(givenBranch);
+        } else {
+            System.out.println(mergeConflict);
+            staged.saveFile();
+            p1 = CURRENT_BRANCH;
+            p2 = givenBranch;
+        }
+        setData();
+    }
 
+    private static void checkUntrack(Commit currentCommit, Commit givenCommit, Commit LCAcommit) {
+        for (Map.Entry<String, String> x : givenCommit.entrySet()) {
+            String fileName = x.getKey();
+            String fileHashCode = x.getValue();
+            String fileLCAHashCode = LCAcommit.find(fileName);
+            File desFile = join(CWD, fileName);
+            if (desFile.exists() && currentCommit.find(fileName) == null && (fileHashCode.equals(fileLCAHashCode) || fileLCAHashCode == null)) {
+                System.out.println(checkoutUntrackedError);
+                exit();
+            }
+        }
+    }
+
+    private static void mergeCommit(Commit currentCommit, Commit givenCommit, Commit LCAcommit, stagedFile staged, boolean flag) {
+        for (Map.Entry<String, String> x : currentCommit.entrySet()) {
+            String fileName = x.getKey();
+            String fileHashCode = x.getValue();
+            String fileGivenHashCode = givenCommit.find(fileName);
+            String fileLCAHashCode = LCAcommit.find(fileName);
+            if (fileHashCode.equals(fileGivenHashCode)) {
+                mergeFile(join(BLOB_DIR, fileHashCode), fileName, staged);
+            } else if (fileGivenHashCode != null) {
+                if (fileHashCode.equals(fileLCAHashCode)) {
+                    isChanged = true;
+                    mergeFile(join(BLOB_DIR, fileGivenHashCode), fileName, staged);
+                } else if (fileGivenHashCode.equals(fileLCAHashCode)) {
+                    mergeFile(join(BLOB_DIR, fileHashCode), fileName, staged);
+                } else {
+                    isChanged = true;
+                    mergeConflictFile(join(BLOB_DIR, fileHashCode),
+                            join(BLOB_DIR, fileGivenHashCode),
+                            join(CWD, fileName),
+                            flag
+                    );
+                }
+            } else {
+                if (fileHashCode.equals(fileLCAHashCode)) {
+                    if (flag) {
+                        isChanged = true;
+                    }
+                    File desFile = join(CWD, fileName);
+                    if (desFile.exists()) {
+                        desFile.delete();
+                    }
+                } else if (fileLCAHashCode != null) {
+                    isChanged = true;
+                    mergeConflictFile(join(BLOB_DIR, fileHashCode),
+                            null,
+                            join(CWD, fileName),
+                            flag
+                    );
+                } else {
+                    if (!flag) {
+                        isChanged = true;
+                    }
+                    mergeFile(join(BLOB_DIR, fileHashCode), fileName, staged);
+                }
+            }
+        }
+    }
+
+    private static void mergeConflictFile(File file1, File file2, File desFile, boolean flag) {
+        isConflict = true;
+        if (!desFile.exists()) {
+            createFile(desFile);
+        }
+        String file1Content = "";
+        String file2Content = "";
+        if (file1 != null) {
+            file1Content = readContentsAsString(file1);
+        }
+        if (file2 != null) {
+            file2Content = readContentsAsString(file2);
+        }
+        if (!flag) {
+            String t = file1Content;
+            file1Content = file2Content;
+            file2Content = t;
+        }
+        writeContents(desFile,
+                "<<<<<<< HEAD\n" + file1Content + "=======\n" + file2Content + ">>>>>>>"
+        );
+    }
+
+    private static void mergeFile(File srcFile, String fileName, stagedFile staged) {
+        staged.put(srcFile, fileName);
+        File CWDFile = join(CWD, fileName);
+        if (!CWDFile.exists()) {
+            createFile(CWDFile);
+        }
+        writeContents(CWDFile, readContents(srcFile));
+    }
 }

@@ -6,7 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import static gitlet.Commit.BLOB_DIR;
 import static gitlet.Repository.GITLET_DIR;
+import static gitlet.Repository.createFile;
 import static gitlet.Utils.*;
 
 public class stagedFile implements Serializable {
@@ -40,9 +42,26 @@ public class stagedFile implements Serializable {
 
     public void put(File srcFile, String file) {
         File desFile = join(STAGED_FILE_DIR, file);
-        Repository.createFile(desFile);
+        createFile(desFile);
         writeContents(desFile, readContents(srcFile));
         staged.add(file);
+    }
+
+    public void toCommit(Commit newCommit) {
+        for (String file : staged) {
+            File desFile = join(STAGED_FILE_DIR, file);
+            byte[] src = readContents(desFile);
+            desFile.delete();
+            String hashCode = sha1(src);
+            File newFile = join(BLOB_DIR, hashCode);
+            if (!newFile.exists()) {
+                createFile(newFile);
+                writeContents(newFile, src);
+            }
+            newCommit.put(file, hashCode);
+        }
+        clear();
+        saveFile();
     }
 
     public void print() {

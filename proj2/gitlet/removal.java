@@ -29,6 +29,10 @@ public class removal implements Serializable {
         removed.clear();
     }
 
+    public boolean isEmpty() {
+        return removed.isEmpty();
+    }
+
     public static removal fromFile() {
         return readObject(REMOV_FILE, removal.class);
     }
