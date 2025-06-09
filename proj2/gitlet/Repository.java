@@ -44,6 +44,12 @@ public class Repository {
     private static final String rmBranchNotExistError = "A branch with that name does not exist.";
     private static final String rmCurrentBranchError = "Cannot remove current branch.";
     private static final String resetError = "No commit with that id exists.";
+    private static final String mergeGivenBranchIsAncestorError = "Given branch is an ancestor of the current branch.";
+    private static final String mergeCurrentBranchIsAncestorError = "Current branch fast-forward.";
+    private static final String mergeWithStagedOrRemovalError = "You have uncommitted changes.";
+    private static final String mergeBranchNotExistError = "A branch with that name does not exist.";
+    private static final String mergeItselfError = "Cannot merge a branch with itself.";
+
     /**
      * The current working directory.
      */
@@ -352,10 +358,16 @@ public class Repository {
         }
     }
 
-    private static void checkoutBranchFile(String branch) {
-        String branchCommitID = branches.get(branch);
+
+    /**
+     * check untracked files
+     * delete files nowTracked but not in commitID
+     * overwrite files from commitID
+     * clear staged-area
+     */
+    private static void setFile(String commitID) {
         String currentBranchCommitID = branches.get(CURRENT_BRANCH);
-        Commit branchCommit = Commit.fromFile(branchCommitID);
+        Commit branchCommit = Commit.fromFile(commitID);
         Commit currentBranchCommit = Commit.fromFile(currentBranchCommitID);
         Iterator<String> it = branchCommit.iterator();
         while (it.hasNext()) {
@@ -388,12 +400,22 @@ public class Repository {
             writeContents(desFile, readContents(srcFile));
         }
 
-        CURRENT_BRANCH = branch;
-        HEAD = branchCommitID;
-
         stagedFile staged = stagedFile.fromFile();
         staged.clear();
         staged.saveFile();
+    }
+
+    private static void checkoutBranchFile(String branch) {
+        String branchCommitID = branches.get(branch);
+        setFile(branchCommitID);
+        CURRENT_BRANCH = branch;
+        HEAD = branchCommitID;
+    }
+
+    private static void resetCommit(String commitID) {
+        setFile(commitID);
+        branches.put(CURRENT_BRANCH, commitID);
+        HEAD = commitID;
     }
 
     public static void checkout(String[] args) {
@@ -447,12 +469,22 @@ public class Repository {
     }
 
     public static void reset(String commitID) {
+        getData();
         Commit commit = Commit.fromFile(commitID);
         if (commit == null) {
             System.out.println(resetError);
             exit();
         }
-
+        resetCommit(commitID);
+        setData();
     }
+
+    //对于同一个文件，在两个分支内，若一个未修改过，一个修改过，保留修改的那一份，并自动staged
+    //都修改了，但内容相同的，保留不变
+    //两个分支都删除的，但目录里还有同名文件，那么被留下来，且不staged也不tracked
+    //在共同祖先没有，但current branch有的，保留
+    //共同祖先有，current branch没有修改，given branch里没有的，删去，且不tracked
+    //共同祖先有，current branch没有，given branch未修改，保留absent
+    //都有不同修改，或者一个修改一个删除的， 或者共同祖先没有，两个分支有但不同的， 使用conflict格式替代内容
 
 }
