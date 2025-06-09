@@ -25,7 +25,7 @@ public class Main {
                 Repository.add(args[1]);
                 break;
             case "commit":
-                Repository.commit(args[1]);
+                Repository.commit(args);
                 break;
             case "rm":
                 Repository.remove(args[1]);
@@ -53,7 +53,10 @@ public class Main {
                 break;
             case "reset":
                 Repository.reset(args[1]);
-
+                break;
+            case "merge":
+                Repository.merge(args[1]);
+                break;
         }
     }
 }
