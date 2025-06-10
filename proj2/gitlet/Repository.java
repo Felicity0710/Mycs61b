@@ -26,31 +26,31 @@ public class Repository {
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
      */
-    private static final String initCommitMessage = "initial commit";
+    private static final String INIT_COMMIT_MESSAGE = "initial commit";
     /**
      * command error message
      */
-    private static final String initError = "A Gitlet version-control system already exists in the current directory.";
-    private static final String addError = "File does not exist.";
-    private static final String commitNoChangeError = "No changes added to the commit.";
-    private static final String commitNoMessageError = "Please enter a commit message";
-    private static final String removeError = "No reason to remove the file.";
-    private static final String findError = "Found no commit with that message.";
-    private static final String checkoutFileNotFoundError = "File does not exist in that commit.";
-    private static final String checkoutCommitNotFoundError = "No commit with that id exists";
-    private static final String checkoutBranchNotFoundError = "No such branch exists";
-    private static final String checkoutCurrentBranchError = "No need to checkout the current branch.";
-    private static final String checkoutUntrackedError = "There is an untracked file in the way; delete it, or add and commit it first.";
-    private static final String branchError = "A branch with that name already exists.";
-    private static final String rmBranchNotExistError = "A branch with that name does not exist.";
-    private static final String rmCurrentBranchError = "Cannot remove the current branch.";
-    private static final String resetError = "No commit with that id exists.";
-    private static final String mergeGivenBranchIsAncestorError = "Given branch is an ancestor of the current branch.";
-    private static final String mergeCurrentBranchIsAncestorError = "Current branch fast-forward.";
-    private static final String mergeWithStagedOrRemovalError = "You have uncommitted changes.";
-    private static final String mergeBranchNotExistError = "A branch with that name does not exist.";
-    private static final String mergeItselfError = "Cannot merge a branch with itself.";
-    private static final String mergeConflict = "Encountered a merge conflict.";
+    private static final String INIT_ERROR = "A Gitlet version-control system already exists in the current directory.";
+    private static final String ADD_ERROR = "File does not exist.";
+    private static final String COMMIT_NO_CHANGE_ERROR = "No changes added to the commit.";
+    private static final String COMMIT_NO_MESSAGE_ERROR = "Please enter a commit message";
+    private static final String REMOVE_ERROR = "No reason to remove the file.";
+    private static final String FIND_ERROR = "Found no commit with that message.";
+    private static final String CHECKOUT_FILE_NOT_FOUND_ERROR = "File does not exist in that commit.";
+    private static final String CHECKOUT_COMMIT_NOT_FOUND_ERROR = "No commit with that id exists";
+    private static final String CHECKOUT_BRANCH_NOT_FOUND_ERROR = "No such branch exists";
+    private static final String CHECKOUT_CURRENT_BRANCH_ERROR = "No need to checkout the current branch.";
+    private static final String CHECKOUT_UNTRACKED_ERROR = "There is an untracked file in the way; delete it, or add and commit it first.";
+    private static final String BRANCH_ERROR = "A branch with that name already exists.";
+    private static final String RM_BRANCH_NOT_EXIST_ERROR = "A branch with that name does not exist.";
+    private static final String RM_CURRENT_BRANCH_ERROR = "Cannot remove the current branch.";
+    private static final String RESET_ERROR = "No commit with that id exists.";
+    private static final String MERGE_GIVEN_BRANCH_IS_ANCESTOR_ERROR = "Given branch is an ancestor of the current branch.";
+    private static final String MERGE_CURRENT_BRANCH_IS_ANCESTOR_ERROR = "Current branch fast-forwarded.";
+    private static final String MERGE_WITH_STAGED_OR_REMOVAL_ERROR = "You have uncommitted changes.";
+    private static final String MERGE_BRANCH_NOT_EXIST_ERROR = "A branch with that name does not exist.";
+    private static final String MERGE_ITSELF_ERROR = "Cannot merge a branch with itself.";
+    private static final String MERGE_CONFLICT = "Encountered a merge conflict.";
     public static final String WITHOUT_INIT = "Not in an initialized Gitlet directory.";
     private static final String OPERAND_ERROR = "Incorrect operands.";
     /**
@@ -131,7 +131,7 @@ public class Repository {
             stagedFile staged = stagedFile.fromFile();
             removal removed = removal.fromFile();
             if (staged.isEmpty() && removed.isEmpty()) {
-                System.out.println(commitNoChangeError);
+                System.out.println(COMMIT_NO_CHANGE_ERROR);
                 exit();
             }
             newCommit.copyParentCommit();
@@ -206,7 +206,7 @@ public class Repository {
 
     public static void init() {
         if (GITLET_DIR.exists()) {
-            System.out.println(initError);
+            System.out.println(INIT_ERROR);
             exit();
         } else {
             GITLET_DIR.mkdir();
@@ -217,7 +217,7 @@ public class Repository {
             getData();
             String initTime = getInitTime();
             setData();
-            HEAD = makeCommit(initTime, initCommitMessage);
+            HEAD = makeCommit(initTime, INIT_COMMIT_MESSAGE);
             makeBranch("master", HEAD);
             setData();
         }
@@ -227,7 +227,7 @@ public class Repository {
         getData();
         File desFile = join(CWD, file);
         if (!desFile.exists()) {
-            System.out.println(addError);
+            System.out.println(ADD_ERROR);
             exit();
         } else {
             stagedFile staged = stagedFile.fromFile();
@@ -251,12 +251,12 @@ public class Repository {
 
     public static void commit(String[] message) {
         if (message.length == 1) {
-            System.out.println(commitNoMessageError);
+            System.out.println(COMMIT_NO_MESSAGE_ERROR);
             exit();
         }
         getData();
         if (message[1].isEmpty()) {
-            System.out.println(commitNoMessageError);
+            System.out.println(COMMIT_NO_MESSAGE_ERROR);
             exit();
         }
         HEAD = makeCommit(getTime(new Date()), message[1]);
@@ -285,7 +285,7 @@ public class Repository {
             removed.saveFile();
         }
         if (!isRemoved) {
-            System.out.println(removeError);
+            System.out.println(REMOVE_ERROR);
         }
     }
 
@@ -324,7 +324,7 @@ public class Repository {
             }
         }
         if (!found) {
-            System.out.println(findError);
+            System.out.println(FIND_ERROR);
         }
     }
 
@@ -360,7 +360,7 @@ public class Repository {
         Commit currentCommit = Commit.fromFile(commitID);
         String hashCode = currentCommit.find(file);
         if (hashCode == null) {
-            System.out.println(checkoutFileNotFoundError);
+            System.out.println(CHECKOUT_FILE_NOT_FOUND_ERROR);
             exit();
         } else {
             File desFile = join(CWD, file);
@@ -388,7 +388,7 @@ public class Repository {
             String file = it.next();
             File desFile = join(CWD, file);
             if (desFile.exists() && currentBranchCommit.find(file) == null) {
-                System.out.println(checkoutUntrackedError);
+                System.out.println(CHECKOUT_UNTRACKED_ERROR);
                 exit();
             }
         }
@@ -439,10 +439,10 @@ public class Repository {
         } else if (args.length == 2) {
             String checkoutBranch = args[1];
             if (!branches.containsKey(checkoutBranch)) {
-                System.out.println(checkoutBranchNotFoundError);
+                System.out.println(CHECKOUT_BRANCH_NOT_FOUND_ERROR);
                 exit();
             } else if (checkoutBranch.equals(CURRENT_BRANCH)) {
-                System.out.println(checkoutCurrentBranchError);
+                System.out.println(CHECKOUT_CURRENT_BRANCH_ERROR);
                 exit();
             } else {
                 checkoutBranchFile(args[1]);
@@ -450,7 +450,7 @@ public class Repository {
         } else if (args.length == 4 && args[2].equals("--")) {
             Commit desCommit = Commit.fromFile(args[1]);
             if (desCommit == null) {
-                System.out.println(checkoutCommitNotFoundError);
+                System.out.println(CHECKOUT_COMMIT_NOT_FOUND_ERROR);
                 exit();
             } else {
                 checkoutFile(args[3], args[1]);
@@ -465,7 +465,7 @@ public class Repository {
     public static void branch(String branchName) {
         getData();
         if (branches.containsKey(branchName)) {
-            System.out.println(branchError);
+            System.out.println(BRANCH_ERROR);
             exit();
         }
         branches.put(branchName, HEAD);
@@ -475,10 +475,10 @@ public class Repository {
     public static void rmBranch(String branchName) {
         getData();
         if (!branches.containsKey(branchName)) {
-            System.out.println(rmBranchNotExistError);
+            System.out.println(RM_BRANCH_NOT_EXIST_ERROR);
             exit();
         } else if (CURRENT_BRANCH.equals(branchName)) {
-            System.out.println(rmCurrentBranchError);
+            System.out.println(RM_CURRENT_BRANCH_ERROR);
             exit();
         }
         branches.remove(branchName);
@@ -489,7 +489,7 @@ public class Repository {
         getData();
         Commit commit = Commit.fromFile(commitID);
         if (commit == null) {
-            System.out.println(resetError);
+            System.out.println(RESET_ERROR);
             exit();
         }
         resetCommit(commitID);
@@ -501,21 +501,21 @@ public class Repository {
         stagedFile staged = stagedFile.fromFile();
         removal removed = removal.fromFile();
         if (!staged.isEmpty() || !removed.isEmpty()) {
-            System.out.println(mergeWithStagedOrRemovalError);
+            System.out.println(MERGE_WITH_STAGED_OR_REMOVAL_ERROR);
             exit();
         }
         if (!branches.containsKey(givenBranch)) {
-            System.out.println(mergeBranchNotExistError);
+            System.out.println(MERGE_BRANCH_NOT_EXIST_ERROR);
             exit();
         }
         if (CURRENT_BRANCH.equals(givenBranch)) {
-            System.out.println(mergeItselfError);
+            System.out.println(MERGE_ITSELF_ERROR);
             exit();
         }
         String currentBranchID = branches.get(CURRENT_BRANCH), givenBranchID = branches.get(givenBranch);
         String LCA = Commit.findLCA(currentBranchID, givenBranchID);
         if (LCA.equals(givenBranchID)) {
-            System.out.println(mergeGivenBranchIsAncestorError);
+            System.out.println(MERGE_GIVEN_BRANCH_IS_ANCESTOR_ERROR);
             exit();
         }
         if (LCA.equals(currentBranchID)) {
@@ -523,7 +523,7 @@ public class Repository {
             checkoutBranchFile(givenBranch);
             CURRENT_BRANCH = currentBranch;
             branches.put(CURRENT_BRANCH, HEAD);
-            System.out.println(mergeCurrentBranchIsAncestorError);
+            System.out.println(MERGE_CURRENT_BRANCH_IS_ANCESTOR_ERROR);
             setData();
             exit();
         }
@@ -536,7 +536,7 @@ public class Repository {
         mergeCommit(currentBranchCommit, givenBranchCommit, LCACommit, staged, true);
         mergeCommit(givenBranchCommit, currentBranchCommit, LCACommit, staged, false);
         if (!isChanged) {
-            System.out.println(commitNoChangeError);
+            System.out.println(COMMIT_NO_CHANGE_ERROR);
             exit();
         }
         Commit newCommit = new Commit(getTime(new Date()),
@@ -551,7 +551,7 @@ public class Repository {
         branches.put(givenBranch, HEAD);
 
         if (isConflict) {
-            System.out.println(mergeConflict);
+            System.out.println(MERGE_CONFLICT);
         }
         isConflict = false;
 
@@ -565,7 +565,7 @@ public class Repository {
             String fileLCAHashCode = LCAcommit.find(fileName);
             File desFile = join(CWD, fileName);
             if (desFile.exists() && currentCommit.find(fileName) == null && (fileHashCode.equals(fileLCAHashCode) || fileLCAHashCode == null)) {
-                System.out.println(checkoutUntrackedError);
+                System.out.println(CHECKOUT_UNTRACKED_ERROR);
                 exit();
             }
         }

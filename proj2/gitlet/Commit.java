@@ -125,9 +125,12 @@ public class Commit implements Serializable {
     public static String findLCA(String commitID1, String commitID2) {
         Commit commit1 = fromFile(commitID1), commit2 = fromFile(commitID2);
         if (commit1.depth < commit2.depth) {
-            Commit t = commit1;
+            Commit tempCommit = commit1;
             commit1 = commit2;
-            commit2 = t;
+            commit2 = tempCommit;
+            String tempString = commitID1;
+            commitID1 = commitID2;
+            commitID2 = tempString;
         }
         while (commit1.depth > commit2.depth) {
             commitID1 = commit1.parent1;
