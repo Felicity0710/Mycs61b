@@ -66,7 +66,7 @@ public class Commit implements Serializable {
         files.remove(file);
     }
 
-    public void CopyParentCommit() {
+    public void copyParentCommit() {
         Commit p = fromFile(parent1);
         files.putAll(p.files);
         depth = p.depth + 1;
@@ -91,7 +91,7 @@ public class Commit implements Serializable {
     }
 
     public static Commit fromFile(String commitId) {
-        if (commitId.length() != 6) {
+        if (commitId.length() == 40) {
             File desFile = join(COMMIT_DIR, commitId);
             if (!desFile.exists()) {
                 return null;
@@ -100,7 +100,7 @@ public class Commit implements Serializable {
         } else {
             List<String> filesList = plainFilenamesIn(COMMIT_DIR);
             for (String file : filesList) {
-                if (file.substring(0, 6).equals(commitId)) {
+                if (file.startsWith(commitId)) {
                     File f = join(COMMIT_DIR, file);
                     return readObject(f, Commit.class);
                 }

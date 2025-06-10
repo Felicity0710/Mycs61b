@@ -3,18 +3,26 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.TreeSet;
 
 import static gitlet.Repository.GITLET_DIR;
 import static gitlet.Utils.*;
 
 public class removal implements Serializable {
-    private LinkedList<String> removed;
+    private TreeSet<String> removed;
     public static final File REMOV_DIR = join(GITLET_DIR, ".removal");
     public static final File REMOV_FILE = join(REMOV_DIR, "removal");
 
+    public void remove(String file) {
+        removed.remove(file);
+    }
+
+    public boolean find(String file) {
+        return removed.contains(file);
+    }
+
     public removal() {
-        removed = new LinkedList<>();
+        removed = new TreeSet<>();
     }
 
     Iterator<String> iterator() {
