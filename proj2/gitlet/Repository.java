@@ -553,16 +553,16 @@ public class Repository {
         isChanged = false;
         Commit currentBranchCommit = Commit.fromFile(currentBranchId);
         Commit givenBranchCommit = Commit.fromFile(givenBranchId);
-        Commit AncestorCommit = Commit.fromFile(ancestorId);
-        checkUntrack(currentBranchCommit, givenBranchCommit, AncestorCommit);
+        Commit ancestorCommit = Commit.fromFile(ancestorId);
+        checkUntrack(currentBranchCommit, givenBranchCommit, ancestorCommit);
         mergeCommit(currentBranchCommit,
                 givenBranchCommit,
-                AncestorCommit,
+                ancestorCommit,
                 staged,
                 true);
         mergeCommit(givenBranchCommit,
                 currentBranchCommit,
-                AncestorCommit,
+                ancestorCommit,
                 staged,
                 false);
         if (!isChanged) {
@@ -588,25 +588,27 @@ public class Repository {
         setData();
     }
 
-    private static void checkUntrack(Commit currentCommit, Commit givenCommit, Commit LCAcommit) {
+    private static void checkUntrack(Commit currentCommit, Commit givenCommit, Commit ancestorCommit) {
         for (Map.Entry<String, String> x : givenCommit.entrySet()) {
             String fileName = x.getKey();
             String fileHashCode = x.getValue();
-            String fileLCAHashCode = LCAcommit.find(fileName);
+            String fileLCAHashCode = ancestorCommit.find(fileName);
             File desFile = join(CWD, fileName);
-            if (desFile.exists() && currentCommit.find(fileName) == null && (fileHashCode.equals(fileLCAHashCode) || fileLCAHashCode == null)) {
+            if (desFile.exists() && currentCommit.find(fileName) == null
+                    && (fileHashCode.equals(fileLCAHashCode)
+                    || fileLCAHashCode == null)) {
                 System.out.println(CHECKOUT_UNTRACKED_ERROR);
                 exit();
             }
         }
     }
 
-    private static void mergeCommit(Commit currentCommit, Commit givenCommit, Commit LCAcommit, StagedFile staged, boolean flag) {
+    private static void mergeCommit(Commit currentCommit, Commit givenCommit, Commit ancestorCommit, StagedFile staged, boolean flag) {
         for (Map.Entry<String, String> x : currentCommit.entrySet()) {
             String fileName = x.getKey();
             String fileHashCode = x.getValue();
             String fileGivenHashCode = givenCommit.find(fileName);
-            String fileLCAHashCode = LCAcommit.find(fileName);
+            String fileLCAHashCode = ancestorCommit.find(fileName);
             if (fileHashCode.equals(fileGivenHashCode)) {
                 mergeFile(join(BLOB_DIR, fileHashCode), fileName, staged);
             } else if (fileGivenHashCode != null) {
@@ -678,10 +680,10 @@ public class Repository {
 
     private static void mergeFile(File srcFile, String fileName, StagedFile staged) {
         staged.put(srcFile, fileName);
-        File WorkingFile = join(CWD, fileName);
-        if (!WorkingFile.exists()) {
-            createFile(WorkingFile);
+        File workingFile = join(CWD, fileName);
+        if (!workingFile.exists()) {
+            createFile(workingFile);
         }
-        writeContents(WorkingFile, readContents(srcFile));
+        writeContents(workingFile, readContents(srcFile));
     }
 }
