@@ -337,11 +337,11 @@ public class Repository {
     public static void find(String message) {
         List<String> commits = plainFilenamesIn(COMMIT_DIR);
         boolean found = false;
-        for (String ID : commits) {
-            String mes = Commit.fromFile(ID).getMessage();
+        for (String id : commits) {
+            String mes = Commit.fromFile(id).getMessage();
             if (mes.equals(message)) {
                 found = true;
-                System.out.println(ID);
+                System.out.println(id);
             }
         }
         if (!found) {
