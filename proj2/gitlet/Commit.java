@@ -75,6 +75,7 @@ public class Commit implements Serializable {
     public void print() {
         System.out.println("Date: " + timestamp);
         System.out.println(message);
+        System.out.println(depth);
         System.out.println();
     }
 
@@ -135,7 +136,7 @@ public class Commit implements Serializable {
         }
         while (!commit1.parent1.equals(commit2.parent1)) {
             commitID1 = commit1.parent1;
-            commitID2 = commit2.parent2;
+            commitID2 = commit2.parent1;
             commit1 = fromFile(commitID1);
             commit2 = fromFile(commitID2);
         }
