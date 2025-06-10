@@ -234,13 +234,12 @@ public class Repository {
             Commit currentCommit = Commit.fromFile(HEAD);
             String commitHashCode = currentCommit.find(file);
             String hashCode = sha1(readContents(desFile));
-            if (!hashCode.equals(commitHashCode)) {
-                staged.put(desFile, file);
-                removal removed = removal.fromFile();
-                if (removed.find(file)) {
-                    removed.remove(file);
-                }
+            removal removed = removal.fromFile();
+            if (removed.find(file)) {
+                removed.remove(file);
                 removed.saveFile();
+            } else if (!hashCode.equals(commitHashCode)) {
+                staged.put(desFile, file);
             } else {
                 if (staged.find(file)) {
                     staged.remove(file);
@@ -256,29 +255,12 @@ public class Repository {
             exit();
         }
         getData();
-        if (!isConflict) {
-            if (message[1].isEmpty()) {
-                System.out.println(commitNoMessageError);
-                exit();
-            }
-            HEAD = makeCommit(getTime(new Date()), message[1]);
-            makeBranch(CURRENT_BRANCH, HEAD);
-        } else {
-            isConflict = false;
-            String parent1 = branches.get(p1), parent2 = branches.get(p2);
-            Commit newCommit = new Commit(getTime(new Date()),
-                    "Merged " + p1 + " into " + p2 + ".",
-                    branches.get(p1),
-                    branches.get(p2),
-                    Commit.fromFile(parent1).depth() + 1
-            );
-            stagedFile staged = stagedFile.fromFile();
-            staged.toCommit(newCommit);
-            staged.saveFile();
-            HEAD = newCommit.saveFile();
-            makeBranch(CURRENT_BRANCH, HEAD);
-            branches.put(p2, HEAD);
+        if (message[1].isEmpty()) {
+            System.out.println(commitNoMessageError);
+            exit();
         }
+        HEAD = makeCommit(getTime(new Date()), message[1]);
+        makeBranch(CURRENT_BRANCH, HEAD);
         setData();
     }
 
@@ -557,23 +539,22 @@ public class Repository {
             System.out.println(commitNoChangeError);
             exit();
         }
-        if (!isConflict) {
-            Commit newCommit = new Commit(getTime(new Date()),
-                    "Merged " + givenBranch + " into " + CURRENT_BRANCH + ".",
-                    currentBranchID,
-                    givenBranchID,
-                    currentBranchCommit.depth() + 1
-            );
-            staged.toCommit(newCommit);
-            HEAD = newCommit.saveFile();
-            branches.put(CURRENT_BRANCH, HEAD);
-            branches.put(givenBranch, HEAD);
-        } else {
+        Commit newCommit = new Commit(getTime(new Date()),
+                "Merged " + givenBranch + " into " + CURRENT_BRANCH + ".",
+                currentBranchID,
+                givenBranchID,
+                currentBranchCommit.depth() + 1
+        );
+        staged.toCommit(newCommit);
+        HEAD = newCommit.saveFile();
+        branches.put(CURRENT_BRANCH, HEAD);
+        branches.put(givenBranch, HEAD);
+
+        if (isConflict) {
             System.out.println(mergeConflict);
-            staged.saveFile();
-            p1 = CURRENT_BRANCH;
-            p2 = givenBranch;
         }
+        isConflict = false;
+
         setData();
     }
 
@@ -606,11 +587,13 @@ public class Repository {
                     mergeFile(join(BLOB_DIR, fileHashCode), fileName, staged);
                 } else {
                     isChanged = true;
+                    File desFile = join(CWD, fileName);
                     mergeConflictFile(join(BLOB_DIR, fileHashCode),
                             join(BLOB_DIR, fileGivenHashCode),
-                            join(CWD, fileName),
+                            desFile,
                             flag
                     );
+                    staged.put(desFile, fileName);
                 }
             } else {
                 if (fileHashCode.equals(fileLCAHashCode)) {
@@ -623,11 +606,13 @@ public class Repository {
                     }
                 } else if (fileLCAHashCode != null) {
                     isChanged = true;
+                    File desFile = join(CWD, fileName);
                     mergeConflictFile(join(BLOB_DIR, fileHashCode),
                             null,
-                            join(CWD, fileName),
+                            desFile,
                             flag
                     );
+                    staged.put(desFile, fileName);
                 } else {
                     if (!flag) {
                         isChanged = true;
