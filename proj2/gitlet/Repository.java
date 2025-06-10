@@ -329,8 +329,8 @@ public class Repository {
     public static void globalLog() {
         getData();
         List<String> commits = plainFilenamesIn(COMMIT_DIR);
-        for (String ID : commits) {
-            print(ID);
+        for (String id : commits) {
+            print(id);
         }
     }
 
@@ -588,7 +588,9 @@ public class Repository {
         setData();
     }
 
-    private static void checkUntrack(Commit currentCommit, Commit givenCommit, Commit ancestorCommit) {
+    private static void checkUntrack(Commit currentCommit,
+                                     Commit givenCommit,
+                                     Commit ancestorCommit) {
         for (Map.Entry<String, String> x : givenCommit.entrySet()) {
             String fileName = x.getKey();
             String fileHashCode = x.getValue();
@@ -603,7 +605,11 @@ public class Repository {
         }
     }
 
-    private static void mergeCommit(Commit currentCommit, Commit givenCommit, Commit ancestorCommit, StagedFile staged, boolean flag) {
+    private static void mergeCommit(Commit currentCommit,
+                                    Commit givenCommit,
+                                    Commit ancestorCommit,
+                                    StagedFile staged,
+                                    boolean flag) {
         for (Map.Entry<String, String> x : currentCommit.entrySet()) {
             String fileName = x.getKey();
             String fileHashCode = x.getValue();
