@@ -240,6 +240,7 @@ public class Repository {
                 if (removed.find(file)) {
                     removed.remove(file);
                 }
+                removed.saveFile();
             } else {
                 if (staged.find(file)) {
                     staged.remove(file);
@@ -276,7 +277,7 @@ public class Repository {
             staged.saveFile();
             HEAD = newCommit.saveFile();
             makeBranch(CURRENT_BRANCH, HEAD);
-            branches.remove(p2);
+            branches.put(p2, HEAD);
         }
         setData();
     }
@@ -292,8 +293,6 @@ public class Repository {
             isRemoved = true;
             staged.remove(file);
             staged.saveFile();
-            removed.put(file);
-            removed.saveFile();
         }
         if (currentCommit.find(file) != null) {
             isRemoved = true;
@@ -568,7 +567,7 @@ public class Repository {
             staged.toCommit(newCommit);
             HEAD = newCommit.saveFile();
             branches.put(CURRENT_BRANCH, HEAD);
-            branches.remove(givenBranch);
+            branches.put(givenBranch, HEAD);
         } else {
             System.out.println(mergeConflict);
             staged.saveFile();

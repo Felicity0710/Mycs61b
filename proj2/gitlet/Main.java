@@ -16,7 +16,7 @@ public class Main {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("No command with that name exists.");
+            System.out.println("Please enter a command.");
             System.exit(0);
         }
         String firstArg = args[0];
