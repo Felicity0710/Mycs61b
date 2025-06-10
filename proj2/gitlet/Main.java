@@ -1,5 +1,8 @@
 package gitlet;
 
+import static gitlet.Repository.GITLET_DIR;
+import static gitlet.Repository.WITHOUT_INIT;
+
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
  *
@@ -13,14 +16,19 @@ public class Main {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("No command");
+            System.out.println("No command with that name exists.");
             System.exit(0);
         }
         String firstArg = args[0];
+        if (firstArg.equals("init")) {
+            Repository.init();
+            System.exit(0);
+        }
+        if (!GITLET_DIR.exists()) {
+            System.out.println(WITHOUT_INIT);
+            System.exit(0);
+        }
         switch (firstArg) {
-            case "init":
-                Repository.init();
-                break;
             case "add":
                 Repository.add(args[1]);
                 break;
@@ -57,6 +65,8 @@ public class Main {
             case "merge":
                 Repository.merge(args[1]);
                 break;
+            default:
+                System.out.println("No command with that name exists.");
         }
     }
 }

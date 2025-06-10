@@ -285,21 +285,23 @@ public class Repository {
         getData();
         File desFile = join(CWD, file);
         stagedFile staged = stagedFile.fromFile();
+        removal removed = removal.fromFile();
+        Commit currentCommit = Commit.fromFile(HEAD);
         boolean isRemoved = false;
         if (staged.find(file)) {
             isRemoved = true;
             staged.remove(file);
             staged.saveFile();
+            removed.put(file);
+            removed.saveFile();
         }
-        Commit currentCommit = Commit.fromFile(HEAD);
         if (currentCommit.find(file) != null) {
             isRemoved = true;
             if (desFile.exists()) {
                 desFile.delete();
             }
-            removal remov = removal.fromFile();
-            remov.put(file);
-            remov.saveFile();
+            removed.put(file);
+            removed.saveFile();
         }
         if (!isRemoved) {
             System.out.println(removeError);
@@ -310,10 +312,6 @@ public class Repository {
         Commit commit = Commit.fromFile(ID);
         System.out.println("===");
         System.out.println("commit " + ID);
-        String p1 = commit.parent1ID(), p2 = commit.parent2ID();
-        if (!p1.isEmpty() && !p2.isEmpty()) {
-            System.out.println("Merge: " + p1.substring(0, 6) + " " + p2.substring(0, 6));
-        }
         commit.print();
         return p1;
     }
@@ -660,7 +658,7 @@ public class Repository {
             file2Content = t;
         }
         writeContents(desFile,
-                "<<<<<<< HEAD\n" + file1Content + "=======\n" + file2Content + ">>>>>>>"
+                "<<<<<<< HEAD\n" + file1Content + "=======\n" + file2Content + ">>>>>>>\n"
         );
     }
 

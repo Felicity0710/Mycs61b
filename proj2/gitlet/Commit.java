@@ -73,6 +73,9 @@ public class Commit implements Serializable {
     }
 
     public void print() {
+        if (!parent1.isEmpty() && !parent2.isEmpty()) {
+            System.out.println("Merge: " + parent1.substring(0, 7) + " " + parent2.substring(0, 7));
+        }
         System.out.println("Date: " + timestamp);
         System.out.println(message);
         System.out.println();
