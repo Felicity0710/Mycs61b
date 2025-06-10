@@ -313,7 +313,7 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + ID);
         commit.print();
-        return p1;
+        return commit.parent1ID();
     }
 
     public static void log() {
