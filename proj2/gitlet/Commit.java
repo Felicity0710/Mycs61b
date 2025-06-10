@@ -75,7 +75,6 @@ public class Commit implements Serializable {
     public void print() {
         System.out.println("Date: " + timestamp);
         System.out.println(message);
-        System.out.println(depth);
         System.out.println();
     }
 

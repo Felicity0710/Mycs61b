@@ -32,7 +32,7 @@ public class Repository {
      */
     private static final String initError = "A Gitlet version-control already exists in the current directory.";
     private static final String addError = "File does not exist.";
-    private static final String commitNoChangeError = "No changes to the commit.";
+    private static final String commitNoChangeError = "No changes added to the commit.";
     private static final String commitNoMessageError = "Please enter a commit message";
     private static final String removeError = "No reason to remove the file.";
     private static final String findError = "Found no commit with that message.";
@@ -250,6 +250,10 @@ public class Repository {
         }
         getData();
         if (!isConflict) {
+            if (message[1].isEmpty()) {
+                System.out.println(commitNoMessageError);
+                exit();
+            }
             HEAD = makeCommit(getTime(new Date()), message[1]);
             makeBranch(CURRENT_BRANCH, HEAD);
         } else {
@@ -361,6 +365,12 @@ public class Repository {
         }
         System.out.println();
         //Modificaitons、untracked not completed
+
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        System.out.println();
+
+        System.out.println("=== Untracked Files ===");
+        System.out.println();
     }
 
     private static void checkoutFile(String file, String commitID) {
