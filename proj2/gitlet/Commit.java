@@ -122,7 +122,7 @@ public class Commit implements Serializable {
         return hashCode;
     }
 
-    public static String findLCAHelper(String commitId1, String commitId2) {
+    public static String ancestorHelper(String commitId1, String commitId2) {
         Commit commit1 = fromFile(commitId1), commit2 = fromFile(commitId2);
         if (commit1.depth < commit2.depth) {
             Commit tempCommit = commit1;
@@ -148,21 +148,22 @@ public class Commit implements Serializable {
         return commit1.parent1;
     }
 
-    public static String findLCA(String commitID1, String commitID2) {
-        Commit commit1 = fromFile(commitID1), commit2 = fromFile(commitID2);
-        String LCA = findLCAHelper(commitID1, commitID2);
-        if (commitID1.equals(LCA)) {
-            return LCA;
+    public static String findAncestor(String commitId1, String commitId2) {
+        Commit commit1 = fromFile(commitId1), commit2 = fromFile(commitId2);
+        String latestCommonAncestor = ancestorHelper(commitId1, commitId2);
+        if (commitId1.equals(latestCommonAncestor)) {
+            return latestCommonAncestor;
         }
         if (!commit1.parent2.isEmpty()) {
-            Commit LatestCommonAncestorParent1Parent2 = fromFile(findLCAHelper(commit1.parent1, commit1.parent2));
-            String LatestCommonAncestorParent2 = findLCAHelper(commit1.parent2, commitID2);
-            Commit LCAParent2 = fromFile(LatestCommonAncestorParent2);
-            if (LatestCommonAncestorParent1Parent2.depth < LCAParent2.depth) {
-                return LatestCommonAncestorParent2;
+            Commit ancestorCommonParent =
+                    fromFile(ancestorHelper(commit1.parent1, commit1.parent2));
+            String ancestorParent2 = ancestorHelper(commit1.parent2, commitId2);
+            Commit commitAncestorParent2 = fromFile(ancestorParent2);
+            if (ancestorCommonParent.depth < commitAncestorParent2.depth) {
+                return ancestorParent2;
             }
         }
-        return LCA;
+        return latestCommonAncestor;
     }
 
     public Set<Map.Entry<String, String>> entrySet() {
