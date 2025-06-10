@@ -254,11 +254,12 @@ public class Repository {
             makeBranch(CURRENT_BRANCH, HEAD);
         } else {
             isConflict = false;
+            String parent1 = branches.get(p1), parent2 = branches.get(p2);
             Commit newCommit = new Commit(getTime(new Date()),
                     "Merged " + p1 + " into " + p2 + ".",
                     branches.get(p1),
                     branches.get(p2),
-                    Commit.fromFile(HEAD).depth() + 1
+                    Commit.fromFile(parent1).depth() + 1
             );
             stagedFile staged = stagedFile.fromFile();
             staged.toCommit(newCommit);
@@ -547,7 +548,7 @@ public class Repository {
                     "Merged " + givenBranch + " into " + CURRENT_BRANCH + ".",
                     currentBranchID,
                     givenBranchID,
-                    currentBranchCommit.depth()
+                    currentBranchCommit.depth() + 1
             );
             staged.toCommit(newCommit);
             HEAD = newCommit.saveFile();
